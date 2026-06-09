@@ -1,5 +1,3 @@
-# Guarde este arquivo na raiz do projeto como: main.py
-
 from daos.usuario_dao import UsuarioDAO
 from daos.livro_dao import LivroDAO
 from daos.emprestimo_dao import EmprestimoDAO
