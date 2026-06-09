@@ -79,3 +79,28 @@ class EmprestimoDAO:
             finally:
                 self.db.close()
         return []
+    def update_multa(self, id_emprestimo, valor_multa):
+        """UPDATE: Atualiza o valor da multa de um empréstimo atrasado"""
+        self.db.connect()
+        if self.db.conn:
+            try:
+                query = "UPDATE Emprestimo SET multa = %s WHERE id_emprestimo = %s"
+                self.db.cursor.execute(query, (valor_multa, id_emprestimo))
+                self.db.conn.commit()
+                print(f"Multa de R$ {valor_multa:.2f} aplicada ao empréstimo {id_emprestimo}!")
+            except Error as e:
+                print(f"Erro ao atualizar multa: {e}")
+            finally:
+                self.db.close()
+
+    def get_divida_usuario(self, matricula):
+        """SELECT: Traz todos os empréstimos de um aluno que possuem multa e calcula o total"""
+        self.db.connect()
+        if self.db.conn:
+            try:
+                query = "SELECT id_emprestimo, data_retirada, multa, foi_devolvido FROM Emprestimo WHERE usuario = %s AND multa > 0"
+                self.db.cursor.execute(query, (matricula,))
+                return self.db.cursor.fetchall()
+            finally:
+                self.db.close()
+        return []
