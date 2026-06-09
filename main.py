@@ -131,52 +131,74 @@ def menu_emprestimos(emprestimo_dao):
         print("4. Remover Registro de Empréstimo")
         print("5. Buscar Empréstimos por Aluno")
         print("6. Ver Relatório de Empréstimos + Alunos")
+        print("7. Aplicar/Atualizar Multa em Empréstimo")
+        print("8. Ver Dívida Total de um Aluno")
         print("0. Voltar ao Menu Principal")
-
+        
         opcao = input("Escolha uma opção: ")
-
+        
         if opcao == '1':
             print("\n[Novo Empréstimo]")
             data_retirada = input("Data de Retirada (AAAA-MM-DD): ")
             data_prevista = input("Data de Devolução Prevista (AAAA-MM-DD): ")
             usuario_id = int(input("Matrícula do Aluno que está pegando o livro: "))
             emprestimo_dao.insert(data_retirada, data_prevista, usuario_id)
-
+            
         elif opcao == '2':
             emprestimos = emprestimo_dao.get_all()
             print("\n--- HISTÓRICO DE EMPRÉSTIMOS ---")
             for e in emprestimos:
                 status = "DEVOLVIDO" if e['foi_devolvido'] == 1 else "PENDENTE"
-                print(f"ID Empréstimo: {e['id_emprestimo']} | Aluno (Matrícula): {e['usuario']} | Status: {status}")
-
+                print(f"ID Empréstimo: {e['id_emprestimo']} | Aluno (Matrícula): {e['usuario']} | Status: {status} | Multa: R$ {e['multa']:.2f}")
+                
         elif opcao == '3':
             id_emp = int(input("\nDigite o ID do Empréstimo para confirmar a devolução: "))
             emprestimo_dao.registrar_devolucao(id_emp)
-
+            
         elif opcao == '4':
             id_emp = int(input("\nDigite o ID do Empréstimo a ser deletado: "))
             emprestimo_dao.delete(id_emp)
-
+            
         elif opcao == '5':
             matricula = int(input("\nDigite a matrícula do aluno para buscar os empréstimos dele: "))
             resultados = emprestimo_dao.search_by_usuario_id(matricula)
             print("\n--- RESULTADOS DA BUSCA ---")
             for e in resultados:
                 status = "DEVOLVIDO" if e['foi_devolvido'] == 1 else "PENDENTE"
-                print(f"ID Empréstimo: {e['id_emprestimo']} | Retirado em: {e['data_retirada']} | Status: {status}")
-
+                print(f"ID Empréstimo: {e['id_emprestimo']} | Retirado em: {e['data_retirada']} | Status: {status} | Multa: R$ {e['multa']:.2f}")
+                
         elif opcao == '6':
             resultados = emprestimo_dao.get_emprestimos_com_usuarios()
-            print("\n--- EMPRÉSTIMOS E DADOS DOS ALUNOS ---")
+            print("\n--- EMPRÉSTIMOS E DADOS DOS ALUNOS (JOIN 3) ---")
             for r in resultados:
                 status = "DEVOLVIDO" if r['foi_devolvido'] == 1 else "PENDENTE"
                 print(f"ID: {r['id_emprestimo']} | Aluno: {r['nome']} | Tel: {r['telefone']} | Status: {status}")
-
+                
+        elif opcao == '7':
+            id_emp = int(input("\nDigite o ID do Empréstimo que receberá a multa: "))
+            valor = float(input("Digite o valor da multa: R$ "))
+            emprestimo_dao.update_multa(id_emp, valor)
+            
+        elif opcao == '8':
+            matricula = int(input("\nDigite a matrícula do aluno para ver as dívidas: "))
+            dividas = emprestimo_dao.get_divida_usuario(matricula)
+            
+            if dividas:
+                print(f"\n--- DÍVIDAS DO ALUNO {matricula} ---")
+                total = 0
+                for d in dividas:
+                    status = "DEVOLVIDO" if d['foi_devolvido'] == 1 else "PENDENTE"
+                    print(f"Empréstimo ID {d['id_emprestimo']} (Retirado: {d['data_retirada']}) | Status: {status} | Multa: R$ {d['multa']:.2f}")
+                    total += d['multa']
+                print(f"-----------------------------------")
+                print(f"VALOR TOTAL DEVIDO: R$ {total:.2f}")
+            else:
+                print(f"\nO aluno {matricula} não possui multas registradas.")
+                
         elif opcao == '0':
             break
         else:
             print("Opção inválida!")
-
 
 def menu_cartoes(cartao_dao):
     while True:
