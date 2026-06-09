@@ -104,3 +104,22 @@ class EmprestimoDAO:
             finally:
                 self.db.close()
         return []
+
+    def get_todas_dividas(self):
+        """SELECT + JOIN: Retorna todos os empréstimos com multa maior que zero de todos os alunos"""
+        self.db.connect()
+        if self.db.conn:
+            try:
+                # Faz um JOIN para pegar o nome e matrícula do usuário junto com o valor da multa
+                query = """
+                    SELECT E.id_emprestimo, E.multa, E.foi_devolvido, U.matricula, U.nome 
+                    FROM Emprestimo E
+                    INNER JOIN Usuario U ON E.usuario = U.matricula
+                    WHERE E.multa > 0
+                    ORDER BY E.multa DESC
+                """
+                self.db.cursor.execute(query)
+                return self.db.cursor.fetchall()
+            finally:
+                self.db.close()
+        return []
