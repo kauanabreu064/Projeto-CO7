@@ -276,6 +276,39 @@ def menu_autores(autor_dao):
         else:
             print("Opção inválida!")
 
+def relatorio_geral(usuario_dao, livro_dao, emprestimo_dao, cartao_dao, autor_dao):
+    print("\n" + "="*50)
+    print("   RAIO-X DO BANCO DE DADOS (SELECT * GERAL)")
+    print("="*50)
+    
+    print("\n--- 1. TABELA DE USUÁRIOS ---")
+    usuarios = usuario_dao.get_all()
+    for u in usuarios:
+        print(f"Matrícula: {u['matricula']} | Nome: {u['nome']} | Tel: {u['telefone']}")
+        
+    print("\n--- 2. TABELA DE LIVROS ---")
+    livros = livro_dao.get_all()
+    for l in livros:
+        print(f"[{l['codigo_de_barras']}] {l['nome']} - R$ {l['valor_reposicao']:.2f}")
+        
+    print("\n--- 3. TABELA DE EMPRÉSTIMOS ---")
+    emprestimos = emprestimo_dao.get_all()
+    for e in emprestimos:
+        status = "DEVOLVIDO" if e['foi_devolvido'] == 1 else "PENDENTE"
+        print(f"ID: {e['id_emprestimo']} | Aluno: {e['usuario']} | Status: {status}")
+        
+    print("\n--- 4. TABELA DE CARTÕES DE ACESSO ---")
+    cartoes = cartao_dao.get_all()
+    for c in cartoes:
+        status = "ATIVO" if c['esta_ativo'] == 1 else "INATIVO"
+        print(f"Código: {c['codigo_de_barras']} | Emissão: {c['data_emissao']} | Status: {status}")
+        
+    print("\n--- 5. TABELA DE AUTORES ---")
+    autores = autor_dao.get_all()
+    for a in autores:
+        print(f"ID: {a['id_autor']} | Nome: {a['nome']} | Nac: {a['nacionalidade']}")
+        
+    print("\n" + "="*50)
 
 def main():
     usuario_dao = UsuarioDAO()
@@ -293,6 +326,7 @@ def main():
         print("3. Menu de Gerenciamento de Empréstimos")
         print("4. Menu de Gerenciamento de Cartões de Acesso")
         print("5. Menu de Gerenciamento de Autores")
+        print("6. Mostrar Todo o Banco de Dados")
         print("0. Sair do Sistema")
         print("=======================================")
 
@@ -308,6 +342,8 @@ def main():
             menu_cartoes(cartao_dao)
         elif opcao == '5':
             menu_autores(autor_dao)
+        elif opcao == '6':
+            relatorio_geral(usuario_dao, livro_dao, emprestimo_dao, cartao_dao, autor_dao)
         elif opcao == '0':
             print("\nEncerrando o sistema da biblioteca. Até à próxima!")
             break
