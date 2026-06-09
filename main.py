@@ -275,8 +275,6 @@ def menu_autores(autor_dao):
             print("Opção inválida!")
 
 def relatorio_geral(usuario_dao, livro_dao, emprestimo_dao, cartao_dao, autor_dao):
-    print("\n" + "="*50)
-    print("   RAIO-X DO BANCO DE DADOS (SELECT * GERAL)")
     print("="*50)
     
     print("\n--- 1. TABELA DE USUÁRIOS ---")
