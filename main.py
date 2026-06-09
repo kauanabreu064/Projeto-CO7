@@ -133,6 +133,7 @@ def menu_emprestimos(emprestimo_dao):
         print("6. Ver Relatório de Empréstimos + Alunos")
         print("7. Aplicar/Atualizar Multa em Empréstimo")
         print("8. Ver Dívida Total de um Aluno")
+        print("9. Ver Todas as Dívidas de Todos os Alunos")
         print("0. Voltar ao Menu Principal")
         
         opcao = input("Escolha uma opção: ")
@@ -169,7 +170,7 @@ def menu_emprestimos(emprestimo_dao):
                 
         elif opcao == '6':
             resultados = emprestimo_dao.get_emprestimos_com_usuarios()
-            print("\n--- EMPRÉSTIMOS E DADOS DOS ALUNOS (JOIN 3) ---")
+            print("\n--- EMPRÉSTIMOS E DADOS DOS ALUNOS ---")
             for r in resultados:
                 status = "DEVOLVIDO" if r['foi_devolvido'] == 1 else "PENDENTE"
                 print(f"ID: {r['id_emprestimo']} | Aluno: {r['nome']} | Tel: {r['telefone']} | Status: {status}")
@@ -194,6 +195,23 @@ def menu_emprestimos(emprestimo_dao):
                 print(f"VALOR TOTAL DEVIDO: R$ {total:.2f}")
             else:
                 print(f"\nO aluno {matricula} não possui multas registradas.")
+                
+        elif opcao == '9':
+            resultados = emprestimo_dao.get_todas_dividas()
+            if resultados:
+                print("\n" + "="*60)
+                print("   RELATÓRIO GLOBAL DE INADIMPLÊNCIA")
+                print("="*60)
+                total_geral = 0
+                for r in resultados:
+                    status = "DEVOLVIDO" if r['foi_devolvido'] == 1 else "PENDENTE"
+                    print(f"Aluno: {r['nome']} ({r['matricula']}) | Empréstimo ID: {r['id_emprestimo']} | Status: {status} | Multa: R$ {r['multa']:.2f}")
+                    total_geral += r['multa']
+                print("-"*60)
+                print(f"VALOR TOTAL QUE A BIBLIOTECA TEM A RECEBER: R$ {total_geral:.2f}")
+                print("="*60)
+            else:
+                print("\nNão há nenhuma multa ou dívida pendente no sistema.")
                 
         elif opcao == '0':
             break
