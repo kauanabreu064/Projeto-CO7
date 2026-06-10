@@ -73,7 +73,7 @@ def menu_livros(livro_dao):
         print("1. Cadastrar Livro")
         print("2. Listar Todos os Livros")
         print("3. Atualizar Valor do Livro")
-        print("4. Remover Livro (DELETE)")
+        print("4. Remover Livro")
         print("5. Buscar Livro por Título")
         print("6. Ver Catálogo de Livros e seus Autores")
         print("0. Voltar ao Menu Principal")
@@ -131,88 +131,84 @@ def menu_emprestimos(emprestimo_dao):
         print("4. Remover Registro de Empréstimo")
         print("5. Buscar Empréstimos por Aluno")
         print("6. Ver Relatório de Empréstimos + Alunos")
-        print("7. Aplicar/Atualizar Multa em Empréstimo")
-        print("8. Ver Dívida Total de um Aluno")
-        print("9. Ver Todas as Dívidas de Todos os Alunos")
+        print("7. Ver Dívida Total de um Aluno")
+        print("8. Ver Todas as Dívidas de Todos os Alunos")
         print("0. Voltar ao Menu Principal")
-        
+
         opcao = input("Escolha uma opção: ")
-        
+
         if opcao == '1':
             print("\n[Novo Empréstimo]")
             data_retirada = input("Data de Retirada (AAAA-MM-DD): ")
             data_prevista = input("Data de Devolução Prevista (AAAA-MM-DD): ")
-            usuario_id = int(input("Matrícula do Aluno que está pegando o livro: "))
-            emprestimo_dao.insert(data_retirada, data_prevista, usuario_id)
-            
+            usuario_id = int(input("Matrícula do Aluno: "))
+            taxa_multa = float(input("Valor da multa por dia de atraso: R$ "))
+            emprestimo_dao.insert(data_retirada, data_prevista, usuario_id, taxa_multa)
+
         elif opcao == '2':
             emprestimos = emprestimo_dao.get_all()
             print("\n--- HISTÓRICO DE EMPRÉSTIMOS ---")
             for e in emprestimos:
                 status = "DEVOLVIDO" if e['foi_devolvido'] == 1 else "PENDENTE"
-                print(f"ID Empréstimo: {e['id_emprestimo']} | Aluno (Matrícula): {e['usuario']} | Status: {status} | Multa: R$ {e['multa']:.2f}")
-                
+                print(
+                    f"ID Empréstimo: {e['id_emprestimo']} | Aluno: {e['usuario']} | Status: {status} | Taxa Diária: R$ {e['multa']:.2f}")
+
         elif opcao == '3':
             id_emp = int(input("\nDigite o ID do Empréstimo para confirmar a devolução: "))
             emprestimo_dao.registrar_devolucao(id_emp)
-            
+
         elif opcao == '4':
             id_emp = int(input("\nDigite o ID do Empréstimo a ser deletado: "))
             emprestimo_dao.delete(id_emp)
-            
+
         elif opcao == '5':
-            matricula = int(input("\nDigite a matrícula do aluno para buscar os empréstimos dele: "))
+            matricula = int(input("\nDigite a matrícula do aluno: "))
             resultados = emprestimo_dao.search_by_usuario_id(matricula)
             print("\n--- RESULTADOS DA BUSCA ---")
             for e in resultados:
                 status = "DEVOLVIDO" if e['foi_devolvido'] == 1 else "PENDENTE"
-                print(f"ID Empréstimo: {e['id_emprestimo']} | Retirado em: {e['data_retirada']} | Status: {status} | Multa: R$ {e['multa']:.2f}")
-                
+                print(f"ID Empréstimo: {e['id_emprestimo']} | Retirado em: {e['data_retirada']} | Status: {status}")
+
         elif opcao == '6':
             resultados = emprestimo_dao.get_emprestimos_com_usuarios()
             print("\n--- EMPRÉSTIMOS E DADOS DOS ALUNOS ---")
             for r in resultados:
                 status = "DEVOLVIDO" if r['foi_devolvido'] == 1 else "PENDENTE"
                 print(f"ID: {r['id_emprestimo']} | Aluno: {r['nome']} | Tel: {r['telefone']} | Status: {status}")
-                
+
         elif opcao == '7':
-            id_emp = int(input("\nDigite o ID do Empréstimo que receberá a multa: "))
-            valor = float(input("Digite o valor da multa: R$ "))
-            emprestimo_dao.update_multa(id_emp, valor)
-            
-        elif opcao == '8':
             matricula = int(input("\nDigite a matrícula do aluno para ver as dívidas: "))
             dividas = emprestimo_dao.get_divida_usuario(matricula)
-            
+
             if dividas:
-                print(f"\n--- DÍVIDAS DO ALUNO {matricula} ---")
+                print(f"\n--- DÍVIDAS ATUAIS DO ALUNO {matricula} ---")
                 total = 0
                 for d in dividas:
-                    status = "DEVOLVIDO" if d['foi_devolvido'] == 1 else "PENDENTE"
-                    print(f"Empréstimo ID {d['id_emprestimo']} (Retirado: {d['data_retirada']}) | Status: {status} | Multa: R$ {d['multa']:.2f}")
-                    total += d['multa']
+                    print(
+                        f"Empréstimo ID {d['id_emprestimo']} | Venceu em: {d['data_devolucao_prevista']} | Multa Acumulada: R$ {d['total_devido']:.2f}")
+                    total += d['total_devido']
                 print(f"-----------------------------------")
-                print(f"VALOR TOTAL DEVIDO: R$ {total:.2f}")
+                print(f"VALOR TOTAL A PAGAR HOJE: R$ {total:.2f}")
             else:
-                print(f"\nO aluno {matricula} não possui multas registradas.")
-                
-        elif opcao == '9':
+                print(f"\nO aluno {matricula} não possui empréstimos atrasados no momento.")
+
+        elif opcao == '8':
             resultados = emprestimo_dao.get_todas_dividas()
             if resultados:
-                print("\n" + "="*60)
-                print("   RELATÓRIO GLOBAL DE INADIMPLÊNCIA")
-                print("="*60)
+                print("\n" + "=" * 60)
+                print("   RELATÓRIO GLOBAL DE INADIMPLÊNCIA     ")
+                print("=" * 60)
                 total_geral = 0
                 for r in resultados:
-                    status = "DEVOLVIDO" if r['foi_devolvido'] == 1 else "PENDENTE"
-                    print(f"Aluno: {r['nome']} ({r['matricula']}) | Empréstimo ID: {r['id_emprestimo']} | Status: {status} | Multa: R$ {r['multa']:.2f}")
-                    total_geral += r['multa']
-                print("-"*60)
-                print(f"VALOR TOTAL QUE A BIBLIOTECA TEM A RECEBER: R$ {total_geral:.2f}")
-                print("="*60)
+                    print(
+                        f"Aluno: {r['nome']} ({r['matricula']}) | Empréstimo: {r['id_emprestimo']} | Dívida Atual: R$ {r['total_devido']:.2f}")
+                    total_geral += r['total_devido']
+                print("-" * 60)
+                print(f"PREJUÍZO TOTAL DA BIBLIOTECA HOJE: R$ {total_geral:.2f}")
+                print("=" * 60)
             else:
-                print("\nNão há nenhuma multa ou dívida pendente no sistema.")
-                
+                print("\nNão há nenhum livro atrasado no sistema hoje.")
+
         elif opcao == '0':
             break
         else:
@@ -384,7 +380,7 @@ def main():
             print("\nEncerrando o sistema da biblioteca. Até à próxima!")
             break
         else:
-            print("Opção incorreta! Digite um número entre 0 e 5.")
+            print("Opção incorreta! Digite um número entre 0 e 6.")
 
 
 if __name__ == "__main__":
