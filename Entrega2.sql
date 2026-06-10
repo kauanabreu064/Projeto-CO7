@@ -54,6 +54,7 @@ CREATE TABLE Livro_has_Emprestimo(
 CREATE TABLE Autor_has_Livros(
 	autor INT,
     livro INT,
+    PRIMARY KEY(autor,livro),
     FOREIGN KEY(autor) REFERENCES Autor(id_autor),
     FOREIGN KEY(livro) REFERENCES Livro(codigo_de_barras)
 );
@@ -160,5 +161,14 @@ JOIN Usuario u ON e.usuario = u.matricula
 JOIN Livro_has_Emprestimo lhe ON e.id_emprestimo = lhe.emprestimo
 JOIN Livro l ON lhe.livro = l.codigo_de_barras
 WHERE e.foi_devolvido = 0 AND CURDATE() > e.data_devolucao_prevista;
+
+-- select * from de todas as tabelas
+SELECT * FROM Cartao_acesso;
+SELECT * FROM Usuario;
+SELECT * FROM Livro;
+SELECT * FROM Autor;
+SELECT * FROM Emprestimo;
+SELECT * FROM Livro_has_Emprestimo;
+SELECT * FROM Autor_has_Livros;
 
   
